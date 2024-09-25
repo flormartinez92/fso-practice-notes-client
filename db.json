@@ -28,7 +28,7 @@
     {
       "id": "9e8a",
       "content": "test 3",
-      "important": true
+      "important": false
     },
     {
       "id": "65b6",
@@ -43,11 +43,16 @@
     {
       "id": "99e6",
       "content": "test 6",
-      "important": false
+      "important": true
     },
     {
       "id": "9afd",
       "content": "POST",
+      "important": true
+    },
+    {
+      "id": "8336",
+      "content": "posting a new note",
       "important": false
     }
   ]
