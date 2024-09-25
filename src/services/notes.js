@@ -1,7 +1,7 @@
 import axios from "axios";
 // const baseUrl = "http://localhost:3001/notes"; // Estas notes salen de json server
-const baseUrl = "http://localhost:3001/api/notes"; // Estas notes salen del back
-// const baseUrl = "/api/notes"; // estas creo que las configuro cuando tengo el dist en el back, chequear
+// const baseUrl = "http://localhost:3001/api/notes"; // Estas notes salen del back
+const baseUrl = "/api/notes"; // Debido a que tanto el frontend como el backend estan en la misma direccion, podemos declarar baseURL como una URL relativa. Entonces podemos omitir la parte que declara el servidor.
 
 const getAll = () => {
   const request = axios.get(baseUrl);
