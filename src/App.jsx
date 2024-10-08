@@ -1,20 +1,20 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Note from './components/Note'
 import noteService from './services/notes'
 import loginService from './services/login'
 import { Notification } from './components/Notification'
-import { Login } from './components/Login'
+import { LoginForm } from './components/LoginForm'
 import { NoteForm } from './components/NoteForm'
 import { Footer } from './components/Footer'
+import { Togglable } from './components/Togglable'
 
 const App = () => {
   const [notes, setNotes] = useState(null)
-  const [newNote, setNewNote] = useState('a new note...')
   const [showAll, setShowAll] = useState(true)
   const [errorMessage, setErrorMessage] = useState(null)
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
+  // * el hook useRef se utiliza para crear una referencia noteFormRef, que se asigna al componente Togglable que contiene el formulario para crear la nota. La variable noteFormRef actua como referencia al componente. Este hook asegura que se mantenga la misma referencia en todas las renderizaciones del componente.
+  const noteFormRef = useRef()
 
   useEffect(() => {
     noteService.getAll().then((initialNotes) => {
@@ -31,17 +31,13 @@ const App = () => {
     }
   }, [])
 
-  const handleLogin = async (e) => {
-    e.preventDefault()
-    console.log('logging in with', username, password)
+  const loginUser = async (userObject) => {
     try {
-      const user = await loginService.login({ username, password })
+      const user = await loginService.login(userObject)
 
       window.localStorage.setItem('loggedNoteAppUser', JSON.stringify(user))
       noteService.setToken(user.token)
       setUser(user)
-      setUsername('')
-      setPassword('')
     } catch (exception) {
       setErrorMessage('Wrong credentials')
       setTimeout(() => {
@@ -50,23 +46,12 @@ const App = () => {
     }
   }
 
-  const addNote = (e) => {
-    e.preventDefault()
-    const noteObj = {
-      content: newNote,
-      important: Math.random() < 0.5,
-    }
-
-    noteService.create(noteObj).then((returnedNote) => {
+  const addNote = (noteObject) => {
+    noteFormRef.current.toggleVisibility()
+    noteService.create(noteObject).then((returnedNote) => {
       //! El método no muta la matriz notes original, sino que crea una nueva copia de la matriz con el nuevo elemento agregado al final. Esto es importante ya que nunca debemos mutar el estado directamente en React!
       setNotes(notes.concat(returnedNote))
-      setNewNote('')
     })
-  }
-
-  //* Se llama al controlador de eventos cada vez que ocurre un cambio en el elemento input. La función del controlador de eventos recibe el objeto de evento como su parámetro event (e):
-  const handleNoteChange = (e) => {
-    setNewNote(e.target.value)
   }
 
   const notesToShow = showAll ? notes : notes.filter((note) => note.important)
@@ -74,6 +59,7 @@ const App = () => {
   const toggleImportanceOf = (id) => {
     const note = notes.find((n) => n.id === id)
     const changedNote = { ...note, important: !note.important }
+
     noteService
       .update(id, changedNote)
       .then((returnedNote) => {
@@ -99,22 +85,16 @@ const App = () => {
       <Notification message={errorMessage} />
 
       {user === null ? (
-        <Login
-          handleLogin={handleLogin}
-          username={username}
-          password={password}
-          setUsername={setUsername}
-          setPassword={setPassword}
-        />
+        <Togglable buttonLabel="login">
+          <LoginForm login={loginUser} />
+        </Togglable>
       ) : (
         <div>
           <p>{user.name} logged-in</p>
           {
-            <NoteForm
-              addNote={addNote}
-              newNote={newNote}
-              handleNoteChange={handleNoteChange}
-            />
+            <Togglable buttonLabel="new note" ref={noteFormRef}>
+              <NoteForm createNote={addNote} />
+            </Togglable>
           }
         </div>
       )}
@@ -133,7 +113,6 @@ const App = () => {
           />
         ))}
       </ul>
-
       <Footer />
     </div>
   )
