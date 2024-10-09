@@ -1,4 +1,5 @@
 import React, { useState, forwardRef, useImperativeHandle } from 'react'
+import PropTypes from 'prop-types'
 
 // forwardRef le permite a un componente exponer un nodo DOM al componente padre con una ref.
 export const Togglable = forwardRef((props, ref) => {
@@ -31,3 +32,9 @@ export const Togglable = forwardRef((props, ref) => {
     </div>
   )
 })
+
+Togglable.propTypes = {
+  buttonLabel: PropTypes.string.isRequired,
+}
+
+Togglable.displayName = 'Togglable'
